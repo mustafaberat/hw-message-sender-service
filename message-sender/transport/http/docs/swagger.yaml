@@ -1,0 +1,131 @@
+definitions:
+  model.ActionType:
+    enum:
+    - start
+    - stop
+    type: string
+    x-enum-varnames:
+    - ActionStart
+    - ActionStop
+  model.Message:
+    properties:
+      content:
+        type: string
+      id:
+        type: integer
+      isSent:
+        type: boolean
+      messageId:
+        description: ID received from webhook response
+        type: string
+      recipient:
+        type: string
+      sentAt:
+        type: string
+    type: object
+  model.SentMessagesResponse:
+    properties:
+      count:
+        type: integer
+      messages:
+        items:
+          $ref: '#/definitions/model.Message'
+        type: array
+    type: object
+  model.StartStopRequest:
+    properties:
+      action:
+        allOf:
+        - $ref: '#/definitions/model.ActionType'
+        description: Use ActionType enum
+        enum:
+        - start
+        - stop
+    type: object
+  model.StartStopResponse:
+    properties:
+      message:
+        type: string
+      status:
+        type: string
+    type: object
+info:
+  contact:
+    name: mustafa berat aru
+  description: Enterprise messaging service for reliable delivery and tracking of
+    outbound communications
+  title: XXX Message Delivery Service
+  version: "1.0"
+paths:
+  /api/messages/sent:
+    get:
+      description: Get a paginated list of successfully delivered messages with delivery
+        timestamps
+      parameters:
+      - description: 'Page number for pagination (default: 1)'
+        in: query
+        name: page
+        type: integer
+      - description: 'Number of messages per page (default: 10, max: 100)'
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of delivered messages
+          schema:
+            $ref: '#/definitions/model.SentMessagesResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/model.StartStopResponse'
+      summary: Retrieve delivered messages
+      tags:
+      - messages
+  /api/service:
+    post:
+      consumes:
+      - application/json
+      description: Start or stop the automated message delivery process
+      parameters:
+      - description: Service Control Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.StartStopRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Operation successful
+          schema:
+            $ref: '#/definitions/model.StartStopResponse'
+        "400":
+          description: Invalid request parameters
+          schema:
+            $ref: '#/definitions/model.StartStopResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/model.StartStopResponse'
+      summary: Control message delivery service
+      tags:
+      - service
+  /health:
+    get:
+      description: Check the operational status of the message delivery service
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Service health information
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Service health check
+      tags:
+      - monitoring
+swagger: "2.0"

@@ -1,0 +1,52 @@
+run:
+  timeout: 15m
+  allow-parallel-runners: true
+
+linters:
+  disable-all: true
+  enable:
+    - bodyclose
+    - copyloopvar
+    - decorder
+    - dupl
+    - errcheck
+    - errorlint
+    - errname
+    - forcetypeassert
+    - gocritic
+    - gofumpt
+    - gosec
+    - govet
+    - nilerr
+    - nonamedreturns
+    - revive
+    - staticcheck
+    - tagliatelle
+    - unconvert
+    - unparam
+    - unused
+    - wastedassign
+
+issues:
+  exclude-rules:
+    - path: '(.+)_test\.go'
+      linters:
+        - dupl
+        - forcetypeassert
+  exclude-dirs:
+    - (^|/)static-files($|/)
+    - transport/http/docs
+    - (^|/)mocks($|/)
+
+linters-settings:
+  revive:
+    rules:
+      - name: package-comments
+        severity: warning
+        disabled: true
+  govet:
+    disable:
+      - composites
+  gosec:
+    excludes:
+      - G115

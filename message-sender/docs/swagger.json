@@ -1,0 +1,195 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "API for sending and tracking messages",
+        "title": "Message Sender API",
+        "contact": {},
+        "version": "1.0"
+    },
+    "host": "localhost:8080",
+    "basePath": "/",
+    "paths": {
+        "/api/messages/sent": {
+            "get": {
+                "description": "Retrieve a list of sent messages with pagination",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "messages"
+                ],
+                "summary": "Get sent messages",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Page number (default: 1)",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Items per page (default: 10, max: 100)",
+                        "name": "limit",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.SentMessagesResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/model.StartStopResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/service": {
+            "post": {
+                "description": "Start or stop the message sending service",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "service"
+                ],
+                "summary": "Control message sending service",
+                "parameters": [
+                    {
+                        "description": "Start/Stop Request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.StartStopRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.StartStopResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/model.StartStopResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/model.StartStopResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/health": {
+            "get": {
+                "description": "Check if the service is healthy",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "health"
+                ],
+                "summary": "Health check",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "model.ActionType": {
+            "type": "string",
+            "x-enum-varnames": [
+                "ActionStart",
+                "ActionStop"
+            ]
+        },
+        "model.Message": {
+            "type": "object",
+            "properties": {
+                "content": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "isSent": {
+                    "type": "boolean"
+                },
+                "messageId": {
+                    "description": "ID received from webhook response",
+                    "type": "string"
+                },
+                "recipient": {
+                    "type": "string"
+                },
+                "sentAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.SentMessagesResponse": {
+            "type": "object",
+            "properties": {
+                "count": {
+                    "type": "integer"
+                },
+                "messages": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.Message"
+                    }
+                }
+            }
+        },
+        "model.StartStopRequest": {
+            "type": "object",
+            "properties": {
+                "action": {
+                    "description": "Use ActionType enum",
+                    "enum": [
+                        "start",
+                        "stop"
+                    ],
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/model.ActionType"
+                        }
+                    ]
+                }
+            }
+        },
+        "model.StartStopResponse": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        }
+    }
+}

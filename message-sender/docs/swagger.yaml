@@ -1,0 +1,130 @@
+basePath: /
+definitions:
+  model.ActionType:
+    enum:
+    - start
+    - stop
+    type: string
+    x-enum-varnames:
+    - ActionStart
+    - ActionStop
+  model.Message:
+    properties:
+      content:
+        type: string
+      id:
+        type: integer
+      isSent:
+        type: boolean
+      messageId:
+        description: ID received from webhook response
+        type: string
+      recipient:
+        type: string
+      sentAt:
+        type: string
+    type: object
+  model.SentMessagesResponse:
+    properties:
+      count:
+        type: integer
+      messages:
+        items:
+          $ref: '#/definitions/model.Message'
+        type: array
+    type: object
+  model.StartStopRequest:
+    properties:
+      action:
+        allOf:
+        - $ref: '#/definitions/model.ActionType'
+        description: Use ActionType enum
+        enum:
+        - start
+        - stop
+    type: object
+  model.StartStopResponse:
+    properties:
+      message:
+        type: string
+      status:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: API for sending and tracking messages
+  title: Message Sender API
+  version: "1.0"
+paths:
+  /api/messages/sent:
+    get:
+      description: Retrieve a list of sent messages with pagination
+      parameters:
+      - description: 'Page number (default: 1)'
+        in: query
+        name: page
+        type: integer
+      - description: 'Items per page (default: 10, max: 100)'
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.SentMessagesResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.StartStopResponse'
+      summary: Get sent messages
+      tags:
+      - messages
+  /api/service:
+    post:
+      consumes:
+      - application/json
+      description: Start or stop the message sending service
+      parameters:
+      - description: Start/Stop Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.StartStopRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.StartStopResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.StartStopResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.StartStopResponse'
+      summary: Control message sending service
+      tags:
+      - service
+  /health:
+    get:
+      description: Check if the service is healthy
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Health check
+      tags:
+      - health
+swagger: "2.0"

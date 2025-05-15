@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: ../message-sender
+      dockerfile: ../message-sender/Dockerfile
+    container_name: message-sender
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    env_file:
+      - ../message-sender/env/local.env
+    environment:
+      - TZ=UTC
+      - POSTGRES_HOST=postgres
+      - POSTGRES_USER=postgres
+      # Password is retrieved from vault at runtime
+      - POSTGRES_DB=message_sender
+      - REDIS_ADDRESS=redis:6379
+    depends_on:
+      - postgres
+      - redis
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: message-sender-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: message_sender
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7-alpine
+    container_name: message-sender-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+
+volumes:
+  postgres_data:
+  redis_data: 
